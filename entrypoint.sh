@@ -2,21 +2,12 @@
 
 set -e
 
-if [ -z "$PROXY_PASS" ]; then
-    echo "missing the PROXY_PASS variable, please add it to continue"
-    exit 0
-fi
+REQUIRED_VARS="PROXY_PASS API_PROXY_PASS API_PUBLIC_DOMAIN USERNAME PASSWORD"
 
-if [ -z "$USERNAME" ]; then
-    echo "missing the USERNAME variable, please add it to continue"
-    exit 0
-fi
+for var in $REQUIRED_VARS; do
+  eval "[ -z \"\$$var\" ]" && echo "Missing $var environment variable" >&2 && exit 1
+done
 
-if [ -z "$PASSWORD" ]; then
-    echo "missing the PASSWORD variable, please add it to continue"
-    exit 0
-fi
-
-export PASSWORD_HASH=$(caddy hash-password --plaintext $PASSWORD)
+export PASSWORD_HASH=$(caddy hash-password --plaintext "$PASSWORD")
 
 exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile 2>&1
